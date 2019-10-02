@@ -82,13 +82,18 @@ export const SubscribeButton = styled(Button)`
 `;
 
 export const AlertMessage = styled.Text`
-  /* position: absolute;
-  bottom: 20px; */
-  background: rgba(255, 0, 0, 0.7);
+  position: relative;
+  /* background: rgba(255, 0, 0, 0.7); */
   padding: 20px;
   align-self: center;
   border-radius: 4px;
   color: #fff;
   font-family: 'Helvetica';
   font-size: 16px;
+`;
+
+export const Loading = styled.View`
+  position: relative;
+  padding: 20px;
+  border-color: #fff;
 `;

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { format, addDays, subDays, parseISO } from 'date-fns';
+import { ActivityIndicator } from 'react-native';
 
 import api from '~/services/api';
 import defaultBanner from '~/assets/defaultBanner.png';
@@ -23,6 +24,7 @@ import {
   DetailText,
   SubscribeButton,
   AlertMessage,
+  Loading,
 } from './styles';
 
 export default function Dashboard() {
@@ -30,42 +32,50 @@ export default function Dashboard() {
   const [date, setDate] = useState(new Date());
   const [endOfPage, setEndOfPage] = useState(false);
   const [nextPage, setNextPage] = useState(2);
-  const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isThereMore, setIsThereMore] = useState(true);
 
   const formattedDate = useMemo(() => format(date, 'MMMM do'));
 
-  function showEndOfPage() {
-    setEndOfPage(true);
-    setTimeout(() => {
-      setEndOfPage(false);
-    }, 4000);
+  function renderFooter() {
+    if (isThereMore) {
+      return (
+        <Loading>
+          <ActivityIndicator animating size="large" />
+        </Loading>
+      );
+    }
+    return <AlertMessage>There are no more meetups for this day.</AlertMessage>;
   }
-
   async function loadMeetups(page = 1) {
-    if (!isThereMore) return;
     try {
-      setLoading(true);
       const extractDate = format(date, 'yyyy-MM-dd');
       const response = await api.get(
         `meetups/?date=${extractDate}&page=${page}`
       );
       if (page < 2) {
         setMeetups(response.data);
+        setIsRefreshing(false);
       } else {
         setMeetups([...meetups, ...response.data]);
         setNextPage(page + 1);
       }
-      setLoading(false);
     } catch (err) {
       if (err.response.status === 404) {
-        setLoading(false);
         setIsThereMore(false);
-        showEndOfPage();
+        setIsRefreshing(false);
       }
     }
   }
 
+  function handleRefresh() {
+    setIsThereMore(true);
+    setIsRefreshing(true);
+    setNextPage(2);
+    setMeetups([]);
+
+    loadMeetups();
+  }
   useEffect(() => {
     loadMeetups();
   }, [date]);
@@ -103,6 +113,9 @@ export default function Dashboard() {
           <MeetupsList
             data={meetups}
             onEndReachedThreshhold={0.1}
+            onRefresh={handleRefresh}
+            refreshing={isRefreshing}
+            ListFooterComponent={renderFooter}
             onEndReached={() => loadMeetups(nextPage)}
             keyExtractor={item => String(item.id)}
             renderItem={({ item }) => (
@@ -131,9 +144,6 @@ export default function Dashboard() {
             )}
           />
         </Content>
-        {endOfPage && (
-          <AlertMessage>There are no more meetups for this day.</AlertMessage>
-        )}
       </Container>
     </Background>
   );
