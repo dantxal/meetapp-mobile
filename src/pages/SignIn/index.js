@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
+
 import Background from '~/components/Background';
 
 import logo from '~/assets/logo.png';
@@ -11,17 +13,43 @@ import {
   SubmitButton,
   ToRegister,
 } from './styles';
-
-function handleSubmit() {}
+import { signInRequest } from '~/store/modules/auth/actions';
 
 export default function SignIn({ navigation }) {
+  const dispatch = useDispatch();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const passwordRef = useRef();
+
+  function handleSubmit() {
+    dispatch(signInRequest(email, password));
+  }
+
   return (
     <Background>
       <Container>
         <Logo source={logo} />
         <Form>
-          <FormInput placeholder="Your email" />
-          <FormInput placeholder="Your password" />
+          <FormInput
+            placeholder="Your email"
+            keyboardType="email-address"
+            autoCorrect={false}
+            autoCapitalize="none"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current.focus()}
+            value
+            onChangeText={setEmail}
+          />
+          <FormInput
+            placeholder="Your password"
+            ref={passwordRef}
+            secureTextEntry
+            returnKeyType="send"
+            onSubmitEditing={handleSubmit}
+            onChangeText={setPassword}
+          />
           <SubmitButton onPress={handleSubmit}>Log in</SubmitButton>
         </Form>
         <ToRegister onPress={() => navigation.navigate('SignUp')}>
