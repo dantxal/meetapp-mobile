@@ -89,6 +89,6 @@ export const AlertMessage = styled.Text`
   align-self: center;
   border-radius: 4px;
   color: #fff;
-  font-weight: bold;
+  font-family: 'Helvetica';
   font-size: 16px;
 `;

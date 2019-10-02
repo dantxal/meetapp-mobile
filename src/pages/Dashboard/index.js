@@ -29,31 +29,39 @@ export default function Dashboard() {
   const [meetups, setMeetups] = useState([]);
   const [date, setDate] = useState(new Date());
   const [endOfPage, setEndOfPage] = useState(false);
+  const [nextPage, setNextPage] = useState(2);
   const [loading, setLoading] = useState(false);
+  const [isThereMore, setIsThereMore] = useState(true);
 
   const formattedDate = useMemo(() => format(date, 'MMMM do'));
 
-  async function showEndOfPage() {
+  function showEndOfPage() {
     setEndOfPage(true);
-    await setInterval(() => {
+    setTimeout(() => {
       setEndOfPage(false);
     }, 4000);
   }
 
   async function loadMeetups(page = 1) {
+    if (!isThereMore) return;
     try {
       setLoading(true);
       const extractDate = format(date, 'yyyy-MM-dd');
       const response = await api.get(
         `meetups/?date=${extractDate}&page=${page}`
       );
-      setMeetups(response.data);
+      if (page < 2) {
+        setMeetups(response.data);
+      } else {
+        setMeetups([...meetups, ...response.data]);
+        setNextPage(page + 1);
+      }
       setLoading(false);
     } catch (err) {
       if (err.response.status === 404) {
-        setMeetups([]);
         setLoading(false);
-        await showEndOfPage();
+        setIsThereMore(false);
+        showEndOfPage();
       }
     }
   }
@@ -63,6 +71,9 @@ export default function Dashboard() {
   }, [date]);
 
   function changeDay(operation) {
+    setMeetups([]);
+    setIsThereMore(true);
+
     if (operation === 'add') {
       setDate(addDays(date, 1));
     }
@@ -91,6 +102,8 @@ export default function Dashboard() {
 
           <MeetupsList
             data={meetups}
+            onEndReachedThreshhold={0.1}
+            onEndReached={() => loadMeetups(nextPage)}
             keyExtractor={item => String(item.id)}
             renderItem={({ item }) => (
               <Meetup onSubscribe={() => handleSubscribe(item.id)}>

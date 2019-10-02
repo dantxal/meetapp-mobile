@@ -1,6 +1,7 @@
 module.exports = {
-  dependencies: {
-    'react-native-gesture-handler': { platforms: { android: null, ios: null } },
+  project: {
+    ios: {},
+    android: {}, // grouped into "project"
   },
-  assets: ['./src/assets/fonts'],
+  assets: ['./src/assets/fonts/'], // stays the same
 };
