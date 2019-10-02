@@ -39,7 +39,6 @@ export default function SignIn({ navigation }) {
             autoCapitalize="none"
             returnKeyType="next"
             onSubmitEditing={() => passwordRef.current.focus()}
-            value
             onChangeText={setEmail}
           />
           <FormInput

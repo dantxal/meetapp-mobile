@@ -1,17 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Keyboard } from 'react-native';
 
-import { Container, LinearBg } from './styles';
+import { LinearBg } from './styles';
 
 export default function Background({ children }) {
-  return (
-    <Container onPress={Keyboard.dismiss}>
-      <LinearBg>{children}</LinearBg>
-    </Container>
-  );
+  return <LinearBg>{children}</LinearBg>;
 }
-
-Background.propTypes = {
-  children: PropTypes.string.isRequired,
-};

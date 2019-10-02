@@ -27,7 +27,7 @@ export function* signUp({ payload }) {
     const { name, email, password } = payload;
 
     yield call(api.post, 'users', { name, email, password });
-    Alert.alert('Account successfully created', { autoClose: 5000 });
+    Alert.alert('Account successfully created');
     // history.push('/');
   } catch (err) {
     yield put(signFailure());
