@@ -1,13 +1,33 @@
 import React from 'react';
-import { Text } from 'react-native';
 import Background from '~/components/Background';
 
-// import { Container } from './styles';
+import logo from '~/assets/logo.png';
 
-export default function SignIn() {
+import {
+  Container,
+  Logo,
+  Form,
+  FormInput,
+  SubmitButton,
+  ToRegister,
+} from './styles';
+
+function handleSubmit() {}
+
+export default function SignIn({ navigation }) {
   return (
     <Background>
-      <Text>SignIn</Text>
+      <Container>
+        <Logo source={logo} />
+        <Form>
+          <FormInput placeholder="Your email" />
+          <FormInput placeholder="Your password" />
+          <SubmitButton onPress={handleSubmit}>Log in</SubmitButton>
+        </Form>
+        <ToRegister onPress={() => navigation.navigate('SignUp')}>
+          Create free account
+        </ToRegister>
+      </Container>
     </Background>
   );
 }

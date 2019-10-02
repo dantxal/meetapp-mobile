@@ -1,8 +1,17 @@
-import LinearGradient from 'react-native-linear-gradient';
-import styled from 'styled-components/native';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Keyboard } from 'react-native';
 
-export default styled(LinearGradient).attrs({
-  colors: ['#22202c', '#402845'],
-})`
-  flex: 1;
-`;
+import { Container, LinearBg } from './styles';
+
+export default function Background({ children }) {
+  return (
+    <Container onPress={Keyboard.dismiss}>
+      <LinearBg>{children}</LinearBg>
+    </Container>
+  );
+}
+
+Background.propTypes = {
+  children: PropTypes.string.isRequired,
+};
