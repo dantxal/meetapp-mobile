@@ -1,5 +1,4 @@
 import styled from 'styled-components/native';
-import ButtonLink from '~/components/ButtonLink';
 import Button from '~/components/Button';
 
 export const Container = styled.View`
@@ -24,6 +23,7 @@ export const ChangeDate = styled.TouchableOpacity``;
 export const DateText = styled.Text`
   font-size: 20px;
   font-weight: bold;
+  font-family: 'Helvetica';
   margin: 0 15px;
   color: #fff;
 `;
@@ -62,7 +62,8 @@ export const Info = styled.View`
 `;
 export const Title = styled.Text`
   font-size: 18px;
-  font-weight: 700;
+  font-family: 'Helvetica';
+  font-weight: bold;
   color: #333;
 `;
 export const Detail = styled.View`
@@ -89,6 +90,7 @@ export const ListFooter = styled.Text`
   border-radius: 4px;
   color: #fff;
   font-family: 'Helvetica';
+  font-weight: bold;
   font-size: 16px;
   text-align: center;
   line-height: 36px;

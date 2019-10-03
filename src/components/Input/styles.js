@@ -15,5 +15,6 @@ export const TInput = styled.TextInput.attrs({
 })`
   flex: 1;
   font-size: 18px;
+  font-family: 'Helvetica-Normal';
   color: #fff;
 `;

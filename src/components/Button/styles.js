@@ -11,6 +11,7 @@ export const Rect = styled(RectButton)`
 `;
 export const Text = styled.Text`
   color: #fff;
+  font-family: 'Helvetica';
   font-weight: bold;
   font-size: 18px;
 `;

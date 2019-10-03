@@ -1,5 +1,4 @@
 import styled from 'styled-components/native';
-import ButtonLink from '~/components/ButtonLink';
 import Button from '~/components/Button';
 
 export const Container = styled.View`
@@ -63,7 +62,8 @@ export const Info = styled.View`
 `;
 export const Title = styled.Text`
   font-size: 18px;
-  font-weight: 700;
+  font-family: 'Helvetica';
+  font-weight: bold;
   color: #333;
 `;
 export const Detail = styled.View`
@@ -74,6 +74,7 @@ export const Detail = styled.View`
 `;
 export const DetailText = styled.Text`
   color: #999;
+  font-family: 'Helvetica-Normal';
   font-size: 13px;
   margin-left: 5px;
 `;

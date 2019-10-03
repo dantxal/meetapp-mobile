@@ -6,5 +6,6 @@ export const Container = styled.TouchableOpacity`
 `;
 export const Text = styled.Text`
   color: rgba(255, 255, 255, 0.6);
+  font-family: 'Helvetica-Normal';
   font-size: 18px;
 `;
