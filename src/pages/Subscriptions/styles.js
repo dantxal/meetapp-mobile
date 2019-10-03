@@ -26,7 +26,6 @@ export const DateText = styled.Text`
   font-weight: bold;
   margin: 0 15px;
   color: #fff;
-  font-family: 'Helvetica';
 `;
 
 export const MeetupsList = styled.FlatList.attrs({
@@ -90,9 +89,7 @@ export const ListFooter = styled.Text`
   border-radius: 4px;
   color: #fff;
   font-family: 'Helvetica';
-  font-weight: bold;
   font-size: 16px;
-
   text-align: center;
   line-height: 36px;
 `;

@@ -1,13 +1,11 @@
 import React from 'react';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
-// import { Container } from './styles';
-
-import Header from '~/components/Header';
 
 import SignIn from '~/pages/SignIn';
 import SignUp from '~/pages/SignUp';
 import Dashboard from '~/pages/Dashboard';
+import Subscriptions from '~/pages/Subscriptions';
 import Profile from '~/pages/Profile';
 
 export default (isSigned = false) => {
@@ -21,6 +19,7 @@ export default (isSigned = false) => {
         App: createBottomTabNavigator(
           {
             Dashboard,
+            Subscriptions,
             Profile,
           },
           {

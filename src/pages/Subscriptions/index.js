@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { format, addDays, subDays, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ActivityIndicator, Alert } from 'react-native';
 
 import api from '~/services/api';
@@ -12,9 +12,6 @@ import Background from '~/components/Background';
 import {
   Container,
   Content,
-  DateSelector,
-  ChangeDate,
-  DateText,
   MeetupsList,
   Meetup,
   Banner,
@@ -27,16 +24,15 @@ import {
   Loading,
 } from './styles';
 
-export default function Dashboard() {
-  const [meetups, setMeetups] = useState([]);
-  const [date, setDate] = useState(new Date());
+// import { Container } from './styles';
+
+export default function Subscriptions() {
+  const [subscriptions, setSubscriptions] = useState([]);
   const [nextPage, setNextPage] = useState(2);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isThereMore, setIsThereMore] = useState(true);
 
-  const formattedDate = useMemo(() => format(date, 'MMMM do'));
-
-  function renderMeetupListFooter() {
+  function renderSubscriptionListFooter() {
     if (isThereMore) {
       return (
         <Loading>
@@ -46,24 +42,21 @@ export default function Dashboard() {
     }
     return (
       <ListFooter>
-        {meetups.length
-          ? 'There are no more meetups for this day.'
-          : 'There are no meetups marked to this day.'}
+        {subscriptions.length
+          ? 'You have no more subscriptions yet.'
+          : 'You have no subscriptions yet.  \n Pull down to refresh.'}
       </ListFooter>
     );
   }
 
-  async function loadMeetups(page = 1) {
+  async function loadSubscriptions(page = 1) {
     try {
-      const extractDate = format(date, 'yyyy-MM-dd');
-      const response = await api.get(
-        `meetups/?date=${extractDate}&page=${page}`
-      );
+      const response = await api.get(`subscriptions/?page=${page}`);
       if (page < 2) {
-        setMeetups(response.data);
+        setSubscriptions(response.data);
         setIsRefreshing(false);
       } else {
-        setMeetups([...meetups, ...response.data]);
+        setSubscriptions([...subscriptions, ...response.data]);
         setNextPage(page + 1);
       }
     } catch (err) {
@@ -79,79 +72,62 @@ export default function Dashboard() {
       const sourceObject = {
         uri: banner.url.replace(/localhost/, '10.0.2.2'),
       };
-      console.tron.log(sourceObject);
       return sourceObject;
     }
     return defaultBanner;
   }
 
   useEffect(() => {
-    loadMeetups();
-  }, [date]);
+    loadSubscriptions();
+  }, []);
 
   function refreshList() {
     setIsThereMore(true);
     setIsRefreshing(true);
     setNextPage(2);
-    setMeetups([]);
+    setSubscriptions([]);
 
-    loadMeetups();
+    loadSubscriptions();
   }
 
-  function changeDay(operation) {
-    setMeetups([]);
-    setIsThereMore(true);
-
-    if (operation === 'add') {
-      setDate(addDays(date, 1));
-    }
-    if (operation === 'sub') {
-      setDate(subDays(date, 1));
-    }
-  }
-
-  async function handleSubscribe(meetup) {
+  async function handleCancelSubscription(subscription) {
     try {
-      await api.post(`subscriptions/${meetup.id}`);
-      Alert.alert(`You have subscribed to ${meetup.name}.`);
+      const response = await api.delete(`subscriptions/${subscription.id}`);
+      Alert.alert(`You have unsubscribed from ${response.data.meetup.name}.`);
       refreshList();
     } catch (err) {
+      if (err.response.status === 404) {
+        setIsThereMore(false);
+        setIsRefreshing(false);
+      }
       Alert.alert(String(err.response.data.error));
     }
   }
-
   return (
     <Background>
       <Container>
         <Header />
         <Content>
-          <DateSelector>
-            <ChangeDate onPress={() => changeDay('sub')}>
-              <Icon name="chevron-left" size={30} color="#fff" />
-            </ChangeDate>
-            <DateText>{formattedDate}</DateText>
-            <ChangeDate onPress={() => changeDay('add')}>
-              <Icon name="chevron-right" size={30} color="#fff" />
-            </ChangeDate>
-          </DateSelector>
-
           <MeetupsList
-            data={meetups}
+            data={subscriptions}
             onEndReachedThreshhold={0.1}
             onRefresh={refreshList}
             refreshing={isRefreshing}
-            ListFooterComponent={renderMeetupListFooter}
-            onEndReached={() => loadMeetups(nextPage)}
+            ListFooterComponent={renderSubscriptionListFooter}
+            onEndReached={() => loadSubscriptions(nextPage)}
             keyExtractor={item => String(item.id)}
             renderItem={({ item }) => (
-              <Meetup onSubscribe={() => handleSubscribe(item.id)}>
+              <Meetup onSubscribe={() => handleCancelSubscription(item.id)}>
                 <Banner source={setBannerSource(item.banner)} />
                 <Info>
-                  <Title>{item.name}</Title>
+                  <Title>{item.meetup.name}</Title>
                   <Detail>
                     <Icon name="event" size={14} color="#999" />
                     <DetailText>
-                      {format(parseISO(item.date), "MMMM do, 'at' H:mm aa")}
+                      {format(
+                        parseISO(item.meetup.date),
+                        "MMMM do, 'at' H:mm aa"
+                      )}
                     </DetailText>
                   </Detail>
                   <Detail>
@@ -163,8 +139,10 @@ export default function Dashboard() {
                     <DetailText>Promoter: Diego Fernandes</DetailText>
                   </Detail>
 
-                  <SubscribeButton onPress={() => handleSubscribe(item)}>
-                    Subscribe
+                  <SubscribeButton
+                    onPress={() => handleCancelSubscription(item)}
+                  >
+                    Cancel Subscription
                   </SubscribeButton>
                 </Info>
               </Meetup>
@@ -176,9 +154,9 @@ export default function Dashboard() {
   );
 }
 
-Dashboard.navigationOptions = {
+Subscriptions.navigationOptions = {
   tabBarLabel: 'Meetups',
   tabBarIcon: ({ tintColor }) => (
-    <Icon name="format-list-bulleted" size={20} color={tintColor} />
+    <Icon name="local-offer" size={20} color={tintColor} />
   ),
 };
