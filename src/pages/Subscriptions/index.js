@@ -44,7 +44,7 @@ export default function Subscriptions() {
       <ListFooter>
         {subscriptions.length
           ? 'You have no more subscriptions yet.'
-          : 'You have no subscriptions yet.  \n Pull down to refresh.'}
+          : 'You have no subscriptions yet.  \n You may try pulling down to refresh.'}
       </ListFooter>
     );
   }
@@ -93,7 +93,10 @@ export default function Subscriptions() {
   async function handleCancelSubscription(subscription) {
     try {
       const response = await api.delete(`subscriptions/${subscription.id}`);
-      Alert.alert(`You have unsubscribed from ${response.data.meetup.name}.`);
+      Alert.alert(
+        'Unsubscribed successfully!',
+        `You have unsubscribed from ${response.data.meetup.name}.`
+      );
       refreshList();
     } catch (err) {
       if (err.response.status === 404) {

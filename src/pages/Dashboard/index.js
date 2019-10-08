@@ -67,19 +67,24 @@ export default function Dashboard() {
         setNextPage(page + 1);
       }
     } catch (err) {
-      if (err.response.status === 404) {
+      if (err.response && err.response.status === 404) {
         setIsThereMore(false);
         setIsRefreshing(false);
+        console.tron.log(err.response.status);
+      } else {
+        setIsThereMore(false);
+        setIsRefreshing(false);
+        console.tron.log(err);
       }
     }
   }
 
   function setBannerSource(banner) {
+    console.tron.log(banner);
     if (banner) {
       const sourceObject = {
         uri: banner.url.replace(/localhost/, '10.0.2.2'),
       };
-      console.tron.log(sourceObject);
       return sourceObject;
     }
     return defaultBanner;

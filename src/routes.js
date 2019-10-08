@@ -24,6 +24,7 @@ export default (isSigned = false) => {
           },
           {
             resetOnBlur: true,
+            backBehavior: 'history',
             tabBarOptions: {
               keyboardHidesTabBar: true,
               activeTintColor: '#fff',

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Background from '~/components/Background';
 
@@ -38,9 +39,43 @@ export default function Profile({ navigation }) {
   }, [profile]);
 
   function handleSubmit() {
-    dispatch(
-      updateProfileRequest(name, email, oldPassword, password, confirmPassword)
-    );
+    if (!name || !email) {
+      setName(profile.name);
+      setEmail(profile.email);
+    }
+    if (!password && !confirmPassword) {
+      const newProfile = {
+        name,
+        email,
+      };
+      dispatch(updateProfileRequest(newProfile));
+    } else if (
+      (password && (!password || !confirmPassword)) ||
+      (confirmPassword && (!oldPassword || !password))
+    ) {
+      Alert.alert(
+        'To change your password you need to fill the three password fields'
+      );
+    } else if (oldPassword === password) {
+      Alert.alert(
+        'Attention',
+        'Your new password must be different from the old one.'
+      );
+    } else if (password !== confirmPassword) {
+      Alert.alert(
+        'Atenttion!',
+        "Your new password and confirm password don't match"
+      );
+    } else {
+      const newProfile = {
+        name,
+        email,
+        oldPassword,
+        password,
+        confirmPassword,
+      };
+      dispatch(updateProfileRequest(newProfile));
+    }
   }
   function handleLogout() {
     dispatch(signOut());
