@@ -48,7 +48,7 @@ export default function Dashboard() {
       <ListFooter>
         {meetups.length
           ? 'There are no more meetups for this day.'
-          : 'There are no meetups marked to this day.'}
+          : 'There are no meetups scheduled to this day.'}
       </ListFooter>
     );
   }
@@ -118,10 +118,10 @@ export default function Dashboard() {
   async function handleSubscribe(meetup) {
     try {
       await api.post(`subscriptions/${meetup.id}`);
-      Alert.alert(`You have subscribed to ${meetup.name}.`);
+      Alert.alert('Success!', `You have subscribed to ${meetup.name}.`);
       refreshList();
     } catch (err) {
-      Alert.alert(String(err.response.data.error));
+      Alert.alert('Error', err.response.data.error);
     }
   }
 
@@ -149,7 +149,10 @@ export default function Dashboard() {
             onEndReached={() => loadMeetups(nextPage)}
             keyExtractor={item => String(item.id)}
             renderItem={({ item }) => (
-              <Meetup onSubscribe={() => handleSubscribe(item.id)}>
+              <Meetup
+                onSubscribe={() => handleSubscribe(item.id)}
+                past={item.past}
+              >
                 <Banner source={setBannerSource(item.banner)} />
                 <Info>
                   <Title>{item.name}</Title>
@@ -161,15 +164,24 @@ export default function Dashboard() {
                   </Detail>
                   <Detail>
                     <Icon name="place" size={14} color="#999" />
-                    <DetailText>Wall Street, 7777</DetailText>
+                    <DetailText>{item.location}</DetailText>
                   </Detail>
                   <Detail>
                     <Icon name="person" size={14} color="#999" />
-                    <DetailText>Promoter: Diego Fernandes</DetailText>
+                    <DetailText>{`Promoter: ${item.user.name}`}</DetailText>
                   </Detail>
 
-                  <SubscribeButton onPress={() => handleSubscribe(item)}>
-                    Subscribe
+                  <SubscribeButton
+                    onPress={() => (item.past ? null : handleSubscribe(item))}
+                    past={item.past}
+                    style={item.past && { backgroundColor: '#666' }}
+                  >
+                    {item.past
+                      ? `Past (${format(
+                          parseISO(item.date),
+                          "MMMM do, 'at' H:mm aa"
+                        )})`
+                      : 'Subscribe'}
                   </SubscribeButton>
                 </Info>
               </Meetup>

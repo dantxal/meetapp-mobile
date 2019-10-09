@@ -36,11 +36,12 @@ export const MeetupsList = styled.FlatList.attrs({
 `;
 
 export const Meetup = styled.View`
+  background: ${props => (props.past ? '#ddd' : '#fff')};
+
   overflow: hidden;
-  background: #fff;
   border-radius: 4px;
-  height: 345px;
   width: 335px;
+  padding-bottom: 10px;
 
   margin: 10px 30px;
 
