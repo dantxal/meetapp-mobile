@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { format, addDays, subDays, parseISO } from 'date-fns';
+import { withNavigationFocus } from 'react-navigation';
 import { ActivityIndicator, Alert } from 'react-native';
 
 import api from '~/services/api';
-import defaultBanner from '~/assets/defaultBanner.png';
+import correctBannerSource from '~/util/correctBannerSource';
 
 import Header from '~/components/Header';
 import Background from '~/components/Background';
@@ -27,14 +28,14 @@ import {
   Loading,
 } from './styles';
 
-export default function Dashboard() {
+function Dashboard({ isFocused }) {
   const [meetups, setMeetups] = useState([]);
   const [date, setDate] = useState(new Date());
   const [nextPage, setNextPage] = useState(2);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isThereMore, setIsThereMore] = useState(true);
 
-  const formattedDate = useMemo(() => format(date, 'MMMM do'));
+  const formattedDate = useMemo(() => format(date, 'MMMM do'), [date]);
 
   function renderMeetupListFooter() {
     if (isThereMore) {
@@ -48,7 +49,7 @@ export default function Dashboard() {
       <ListFooter>
         {meetups.length
           ? 'There are no more meetups for this day.'
-          : 'There are no meetups marked to this day.'}
+          : 'There are no meetups scheduled to this day.'}
       </ListFooter>
     );
   }
@@ -67,27 +68,19 @@ export default function Dashboard() {
         setNextPage(page + 1);
       }
     } catch (err) {
-      if (err.response.status === 404) {
+      if (err.response && err.response.status === 404) {
+        setIsThereMore(false);
+        setIsRefreshing(false);
+      } else {
         setIsThereMore(false);
         setIsRefreshing(false);
       }
     }
   }
 
-  function setBannerSource(banner) {
-    if (banner) {
-      const sourceObject = {
-        uri: banner.url.replace(/localhost/, '10.0.2.2'),
-      };
-      console.tron.log(sourceObject);
-      return sourceObject;
-    }
-    return defaultBanner;
-  }
-
   useEffect(() => {
-    loadMeetups();
-  }, [date]);
+    if (isFocused) loadMeetups();
+  }, [date, isFocused]);//eslint-disable-line
 
   function refreshList() {
     setIsThereMore(true);
@@ -113,10 +106,10 @@ export default function Dashboard() {
   async function handleSubscribe(meetup) {
     try {
       await api.post(`subscriptions/${meetup.id}`);
-      Alert.alert(`You have subscribed to ${meetup.name}.`);
+      Alert.alert('Success!', `You have subscribed to ${meetup.name}.`);
       refreshList();
     } catch (err) {
-      Alert.alert(String(err.response.data.error));
+      Alert.alert('Error', err.response.data.error);
     }
   }
 
@@ -144,8 +137,11 @@ export default function Dashboard() {
             onEndReached={() => loadMeetups(nextPage)}
             keyExtractor={item => String(item.id)}
             renderItem={({ item }) => (
-              <Meetup onSubscribe={() => handleSubscribe(item.id)}>
-                <Banner source={setBannerSource(item.banner)} />
+              <Meetup
+                onSubscribe={() => handleSubscribe(item.id)}
+                past={item.past}
+              >
+                <Banner source={correctBannerSource(item.banner)} />
                 <Info>
                   <Title>{item.name}</Title>
                   <Detail>
@@ -156,15 +152,24 @@ export default function Dashboard() {
                   </Detail>
                   <Detail>
                     <Icon name="place" size={14} color="#999" />
-                    <DetailText>Wall Street, 7777</DetailText>
+                    <DetailText>{item.location}</DetailText>
                   </Detail>
                   <Detail>
                     <Icon name="person" size={14} color="#999" />
-                    <DetailText>Promoter: Diego Fernandes</DetailText>
+                    <DetailText>{`Promoter: ${item.user.name}`}</DetailText>
                   </Detail>
 
-                  <SubscribeButton onPress={() => handleSubscribe(item)}>
-                    Subscribe
+                  <SubscribeButton
+                    onPress={() => (item.past ? null : handleSubscribe(item))}
+                    past={item.past}
+                    style={item.past && { backgroundColor: '#666' }}
+                  >
+                    {item.past
+                      ? `Past (${format(
+                          parseISO(item.date),
+                          "MMMM do, 'at' H:mm aa"
+                        )})`
+                      : 'Subscribe'}
                   </SubscribeButton>
                 </Info>
               </Meetup>
@@ -182,3 +187,5 @@ Dashboard.navigationOptions = {
     <Icon name="format-list-bulleted" size={20} color={tintColor} />
   ),
 };
+
+export default withNavigationFocus(Dashboard);
