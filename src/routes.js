@@ -1,4 +1,3 @@
-import React from 'react';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
@@ -19,12 +18,12 @@ export default (isSigned = false) => {
         App: createBottomTabNavigator(
           {
             Dashboard,
-            Subscriptions,
+            Subscriptions: {
+              screen: Subscriptions,
+            },
             Profile,
           },
           {
-            resetOnBlur: true,
-            backBehavior: 'history',
             tabBarOptions: {
               keyboardHidesTabBar: true,
               activeTintColor: '#fff',

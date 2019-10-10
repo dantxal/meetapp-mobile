@@ -17,7 +17,7 @@ import {
 import { updateProfileRequest } from '~/store/modules/user/actions';
 import { signOut } from '~/store/modules/auth/actions';
 
-export default function Profile({ navigation }) {
+export default function Profile() {
   const dispatch = useDispatch();
   const profile = useSelector(state => state.user.profile);
 

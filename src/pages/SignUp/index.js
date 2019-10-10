@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 
 import Background from '~/components/Background';
@@ -67,3 +68,9 @@ export default function SignUp({ navigation }) {
     </Background>
   );
 }
+
+SignUp.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func,
+  }).isRequired,
+};

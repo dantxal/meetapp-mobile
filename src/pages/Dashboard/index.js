@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { format, addDays, subDays, parseISO } from 'date-fns';
+import { withNavigationFocus } from 'react-navigation';
 import { ActivityIndicator, Alert } from 'react-native';
 
 import api from '~/services/api';
-import defaultBanner from '~/assets/defaultBanner.png';
+import correctBannerSource from '~/util/correctBannerSource';
 
 import Header from '~/components/Header';
 import Background from '~/components/Background';
@@ -27,14 +28,14 @@ import {
   Loading,
 } from './styles';
 
-export default function Dashboard() {
+function Dashboard({ isFocused }) {
   const [meetups, setMeetups] = useState([]);
   const [date, setDate] = useState(new Date());
   const [nextPage, setNextPage] = useState(2);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isThereMore, setIsThereMore] = useState(true);
 
-  const formattedDate = useMemo(() => format(date, 'MMMM do'));
+  const formattedDate = useMemo(() => format(date, 'MMMM do'), [date]);
 
   function renderMeetupListFooter() {
     if (isThereMore) {
@@ -70,29 +71,16 @@ export default function Dashboard() {
       if (err.response && err.response.status === 404) {
         setIsThereMore(false);
         setIsRefreshing(false);
-        console.tron.log(err.response.status);
       } else {
         setIsThereMore(false);
         setIsRefreshing(false);
-        console.tron.log(err);
       }
     }
   }
 
-  function setBannerSource(banner) {
-    console.tron.log(banner);
-    if (banner) {
-      const sourceObject = {
-        uri: banner.url.replace(/localhost/, '10.0.2.2'),
-      };
-      return sourceObject;
-    }
-    return defaultBanner;
-  }
-
   useEffect(() => {
-    loadMeetups();
-  }, [date]);
+    if (isFocused) loadMeetups();
+  }, [date, isFocused]);//eslint-disable-line
 
   function refreshList() {
     setIsThereMore(true);
@@ -153,7 +141,7 @@ export default function Dashboard() {
                 onSubscribe={() => handleSubscribe(item.id)}
                 past={item.past}
               >
-                <Banner source={setBannerSource(item.banner)} />
+                <Banner source={correctBannerSource(item.banner)} />
                 <Info>
                   <Title>{item.name}</Title>
                   <Detail>
@@ -199,3 +187,5 @@ Dashboard.navigationOptions = {
     <Icon name="format-list-bulleted" size={20} color={tintColor} />
   ),
 };
+
+export default withNavigationFocus(Dashboard);

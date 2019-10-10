@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { format, parseISO } from 'date-fns';
 import { ActivityIndicator, Alert } from 'react-native';
-
+import { withNavigationFocus } from 'react-navigation';
 import api from '~/services/api';
-import defaultBanner from '~/assets/defaultBanner.png';
+import correctBannerSource from '~/util/correctBannerSource';
 
 import Header from '~/components/Header';
 import Background from '~/components/Background';
@@ -26,7 +26,7 @@ import {
 
 // import { Container } from './styles';
 
-export default function Subscriptions() {
+function Subscriptions({ isFocused }) {
   const [subscriptions, setSubscriptions] = useState([]);
   const [nextPage, setNextPage] = useState(2);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -65,21 +65,12 @@ export default function Subscriptions() {
         setIsRefreshing(false);
       }
     }
-  }
+  };//eslint-disable-line
 
-  function setBannerSource(banner) {
-    if (banner) {
-      const sourceObject = {
-        uri: banner.url.replace(/localhost/, '10.0.2.2'),
-      };
-      return sourceObject;
-    }
-    return defaultBanner;
-  }
 
   useEffect(() => {
     loadSubscriptions();
-  }, []);
+  }, [isFocused]); //eslint-disable-line
 
   function refreshList() {
     setIsThereMore(true);
@@ -106,6 +97,7 @@ export default function Subscriptions() {
       Alert.alert(String(err.response.data.error));
     }
   }
+
   return (
     <Background>
       <Container>
@@ -119,37 +111,40 @@ export default function Subscriptions() {
             ListFooterComponent={renderSubscriptionListFooter}
             onEndReached={() => loadSubscriptions(nextPage)}
             keyExtractor={item => String(item.id)}
-            renderItem={({ item }) => (
-              <Meetup onSubscribe={() => handleCancelSubscription(item.id)}>
-                <Banner source={setBannerSource(item.banner)} />
-                <Info>
-                  <Title>{item.meetup.name}</Title>
-                  <Detail>
-                    <Icon name="event" size={14} color="#999" />
-                    <DetailText>
-                      {format(
-                        parseISO(item.meetup.date),
-                        "MMMM do, 'at' H:mm aa"
-                      )}
-                    </DetailText>
-                  </Detail>
-                  <Detail>
-                    <Icon name="place" size={14} color="#999" />
-                    <DetailText>Wall Street, 7777</DetailText>
-                  </Detail>
-                  <Detail>
-                    <Icon name="person" size={14} color="#999" />
-                    <DetailText>Promoter: Diego Fernandes</DetailText>
-                  </Detail>
+            renderItem={({ item }) => {
+              console.tron.log(item);
+              return (
+                <Meetup onSubscribe={() => handleCancelSubscription(item.id)}>
+                  <Banner source={correctBannerSource(item.meetup.banner)} />
+                  <Info>
+                    <Title>{item.meetup.name}</Title>
+                    <Detail>
+                      <Icon name="event" size={14} color="#999" />
+                      <DetailText>
+                        {format(
+                          parseISO(item.meetup.date),
+                          "MMMM do, 'at' H:mm aa"
+                        )}
+                      </DetailText>
+                    </Detail>
+                    <Detail>
+                      <Icon name="place" size={14} color="#999" />
+                      <DetailText>{item.meetup.location}</DetailText>
+                    </Detail>
+                    <Detail>
+                      <Icon name="person" size={14} color="#999" />
+                      <DetailText>{`Promoter: ${item.meetup.user.name}`}</DetailText>
+                    </Detail>
 
-                  <SubscribeButton
-                    onPress={() => handleCancelSubscription(item)}
-                  >
-                    Cancel Subscription
-                  </SubscribeButton>
-                </Info>
-              </Meetup>
-            )}
+                    <SubscribeButton
+                      onPress={() => handleCancelSubscription(item)}
+                    >
+                      Cancel Subscription
+                    </SubscribeButton>
+                  </Info>
+                </Meetup>
+              );
+            }}
           />
         </Content>
       </Container>
@@ -163,3 +158,5 @@ Subscriptions.navigationOptions = {
     <Icon name="local-offer" size={20} color={tintColor} />
   ),
 };
+
+export default withNavigationFocus(Subscriptions);
